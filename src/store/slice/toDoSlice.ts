@@ -1,20 +1,26 @@
-import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { Task } from "../../type/type";
+import axios from "axios";
+import { act } from "react";
+
+export const fetchTodos = createAsyncThunk(
+    "todos/fetchTodos",
+    async () => {
+        const response = await axios.get("https://jsonplaceholder.typicode.com/todos?_limit=10")
+        return response.data;
+    }
+)
 
 interface TaskState{
-    todos: Task[],
-    // isLoad: boolean,
-    // isError: boolean,
+    todos: Task[];
+    isLoad: boolean;
+    error: string | null;
 }
 
 const initialState: TaskState = {
-    todos: [{
-        id: 1,
-        title: "Название",
-        isCompleted: false
-    }],
-    // isLoad: false,
-    // isError: false
+    todos: [],
+    isLoad: false,
+    error: null,
 }
 
 const todoSlice = createSlice({
@@ -27,6 +33,21 @@ const todoSlice = createSlice({
         deleteTodo(state, action: PayloadAction<number>){
             state.todos.filter((elem) => elem.id !== action.payload)
         },
+    },
+    extraReducers: (builder) => {
+        builder
+            .addCase(fetchTodos.pending, (state) => {
+                state.isLoad = true;
+                state.error = null
+            })
+            .addCase(fetchTodos.fulfilled, (state, action) => {
+                state.isLoad = false;
+                state.todos = action.payload;
+            })
+            .addCase(fetchTodos.rejected, (state, action) => {
+                state.isLoad = false;
+                state.error = action.error.message || "Ошибка загрузки";
+            })
     }
 })
 
