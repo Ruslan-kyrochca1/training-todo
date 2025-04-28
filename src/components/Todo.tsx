@@ -1,11 +1,11 @@
 import React from 'react'
 import { Task } from '../type/type'
 
-const Todo: React.FC = ({id, title, isCompleted}:Task) => {
+const Todo: React.FC<Task> = ({id, title, isCompleted}) => {
   return (
     <div>
         {title}
-        {isCompleted}
+        {isCompleted? '✅' : '❌'}
     </div>
   )
 }
